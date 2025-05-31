@@ -161,9 +161,9 @@ export function NavMenu() {
       <div className="flex items-center space-x-1 md:space-x-2 ml-2">
         {renderNavItems(false)}
         {!loading && <AuthButtonsDesktop />}
-        <Button variant="ghost" onClick={() => setIsCartOpen(true)} className={desktopLinkClasses}>
+        <Button variant="ghost" onClick={() => setIsCartOpen(true)} className={desktopLinkClasses} aria-label={`View cart with ${itemCount} items`}>
           <ShoppingBag className="h-4 w-4" />
-          Cart ({itemCount})
+          ({itemCount})
         </Button>
       </div>
     </nav>

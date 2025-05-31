@@ -50,7 +50,7 @@ export function ProductCard({ product }: ProductCardProps) {
               variant="outline"
               className="absolute top-2 right-2"
             >
-              Discount Tag
+              {discountPercent}% OFF
             </Badge>
           )}
           {isOutOfStock && (

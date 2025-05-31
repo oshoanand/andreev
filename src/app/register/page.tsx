@@ -17,8 +17,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } 
-from "@/components/ui/input";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
 import { Loader2, Mail, Lock, Phone } from "lucide-react"; 
@@ -100,7 +99,7 @@ export default function RegisterPage() {
                           type="tel" 
                           placeholder="1234567890" 
                           {...field} 
-                          className="pl-10" 
+                          className="pl-10"
                         />
                       </div>
                     </FormControl>

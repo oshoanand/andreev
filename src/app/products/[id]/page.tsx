@@ -32,6 +32,7 @@ export default function ProductPage({ params }: { params: { id: string } }) {
   const averageRating = (product.popularity / 20).toFixed(1);
   const isOutOfStock = product.stock === 0;
   const isInCart = cartItems.some(item => item.product.id === product.id && !isOutOfStock);
+  const isFoodItem = product.category === 'Groceries' || !!product.ingredients || !!product.netWeight;
 
 
   return (
@@ -91,6 +92,65 @@ export default function ProductPage({ params }: { params: { id: string } }) {
             <p className="text-muted-foreground leading-relaxed">{product.description}</p>
           </div>
 
+          {isFoodItem && (
+            <>
+              <Separator className="my-4" />
+              <div className="space-y-3">
+                <h3 className="text-xl font-semibold font-headline">Product Details</h3>
+                {product.netWeight && (
+                  <div>
+                    <span className="font-semibold text-foreground">Net Weight: </span>
+                    <span className="text-sm text-muted-foreground">{product.netWeight}</span>
+                  </div>
+                )}
+                {product.volume && (
+                  <div>
+                    <span className="font-semibold text-foreground">Volume: </span>
+                    <span className="text-sm text-muted-foreground">{product.volume}</span>
+                  </div>
+                )}
+                {product.ingredients && product.ingredients.length > 0 && (
+                  <div>
+                    <h4 className="font-semibold text-foreground mb-1">Ingredients:</h4>
+                    <p className="text-sm text-muted-foreground">{product.ingredients.join(', ')}</p>
+                  </div>
+                )}
+                {product.allergens && product.allergens.length > 0 && (
+                  <div>
+                    <h4 className="font-semibold text-foreground mb-1">Allergens:</h4>
+                    <p className="text-sm text-muted-foreground">{product.allergens.join(', ')}</p>
+                  </div>
+                )}
+                {product.bestBefore && (
+                  <div>
+                    <span className="font-semibold text-foreground">Best Before: </span>
+                    <span className="text-sm text-muted-foreground">{product.bestBefore}</span>
+                  </div>
+                )}
+                {product.nutritionalInfo && Object.keys(product.nutritionalInfo).length > 0 && (
+                  <div>
+                    <h4 className="font-semibold text-foreground mb-1">Nutritional Information:</h4>
+                    <ul className="list-disc list-inside text-sm text-muted-foreground space-y-0.5">
+                      {Object.entries(product.nutritionalInfo).map(([key, value]) => (
+                        <li key={key}>
+                          <span className="font-medium text-foreground/90">{key}:</span> {value}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {product.storageInstructions && (
+                  <div>
+                    <h4 className="font-semibold text-foreground mb-1">Storage Instructions:</h4>
+                    <p className="text-sm text-muted-foreground">{product.storageInstructions}</p>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+          
+          <Separator className="my-4" />
+
           {isOutOfStock ? (
              <div className="p-4 border border-destructive/50 bg-destructive/10 rounded-md text-center text-destructive">
                 <XCircle className="inline-block mr-2 h-5 w-5" />
@@ -109,3 +169,4 @@ export default function ProductPage({ params }: { params: { id: string } }) {
     </div>
   );
 }
+

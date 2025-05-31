@@ -2,13 +2,14 @@
 "use client";
 
 import { mockProducts } from '@/lib/mock-data';
-import type { Product } from '@/lib/types';
+import type { Product, ProductCategory } from '@/lib/types';
 import { ProductCard } from '@/components/products/ProductCard';
 import { SortProducts } from '@/components/products/SortProducts';
+import { CategoryFilter } from '@/components/products/CategoryFilter';
 import { useState, useMemo, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { ShoppingCart } from 'lucide-react'; // Search icon removed as it's no longer used here
+import { ShoppingCart } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -68,10 +69,40 @@ const HeroSection = () => {
 };
 
 export default function HomePage() {
+  const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
+  
   const searchTermFromUrl = searchParams.get('q') || '';
+  const categoryFromUrl = searchParams.get('category') || null;
+  
   const [sortOption, setSortOption] = useState('popularity');
 
+  const uniqueCategories = useMemo(() => {
+    const categoriesMap = new Map<string, ProductCategory>();
+    mockProducts.forEach(product => {
+      if (!categoriesMap.has(product.category)) {
+        categoriesMap.set(product.category, {
+          name: product.category,
+          // Placeholder - in a real app, these would come from a CMS or be predefined
+          imageUrl: `https://placehold.co/100x100.png?text=${encodeURIComponent(product.category)}`,
+          dataAiHint: `${product.category.toLowerCase()}`,
+        });
+      }
+    });
+    return Array.from(categoriesMap.values());
+  }, [mockProducts]);
+
+  const handleSelectCategory = (categoryName: string | null) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (categoryName) {
+      params.set('category', categoryName);
+    } else {
+      params.delete('category');
+    }
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  };
+  
   const filteredAndSortedProducts = useMemo(() => {
     let products = [...mockProducts];
 
@@ -80,6 +111,10 @@ export default function HomePage() {
         product.name.toLowerCase().includes(searchTermFromUrl.toLowerCase()) ||
         product.description.toLowerCase().includes(searchTermFromUrl.toLowerCase())
       );
+    }
+
+    if (categoryFromUrl) {
+      products = products.filter(product => product.category === categoryFromUrl);
     }
 
     switch (sortOption) {
@@ -100,15 +135,20 @@ export default function HomePage() {
         break;
     }
     return products;
-  }, [mockProducts, searchTermFromUrl, sortOption]);
+  }, [mockProducts, searchTermFromUrl, categoryFromUrl, sortOption]);
 
   return (
     <div className="space-y-12">
       <HeroSection />
 
-      <div id="products-grid" className="space-y-8 pt-8">
+      <CategoryFilter 
+        categories={uniqueCategories}
+        selectedCategory={categoryFromUrl}
+        onSelectCategory={handleSelectCategory}
+      />
+
+      <div id="products-grid" className="space-y-8">
         <div className="flex flex-col md:flex-row justify-end items-center gap-4 p-4 border-b border-border">
-          {/* Search input removed from here, now in Header */}
           <SortProducts onSortChange={setSortOption} currentSort={sortOption} />
         </div>
 

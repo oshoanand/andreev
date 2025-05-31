@@ -28,3 +28,9 @@ export interface Customer {
   address: string;
   // Orders might be fetched separately or embedded depending on API design
 }
+
+export interface ProductCategory {
+  name: string;
+  imageUrl: string;
+  dataAiHint: string;
+}

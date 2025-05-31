@@ -8,12 +8,20 @@ import { ProductCardSkeleton } from '@/components/products/ProductCardSkeleton';
 import { CategoryFilter } from '@/components/products/CategoryFilter';
 import { FeaturesSection } from '@/components/home/FeaturesSection';
 import { useState, useMemo, useEffect } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation'; // Removed usePathname as it's not used
+import { useSearchParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, ListFilter } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from '@/components/ui/label';
 
 const HeroSection = () => {
   return (
@@ -69,12 +77,15 @@ const HeroSection = () => {
   );
 };
 
+type SortOption = 'popularity' | 'price-asc' | 'price-desc' | 'name-asc';
+
 export default function HomePage() {
   const searchParams = useSearchParams();
   
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isLoadingCategories, setIsLoadingCategories] = useState(true); // For category loading state
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+  const [sortOption, setSortOption] = useState<SortOption>('popularity');
 
   const searchTermFromUrl = searchParams.get('q') || '';
   
@@ -82,17 +93,16 @@ export default function HomePage() {
     const fetchProductsAndCategories = async () => {
       setIsLoading(true);
       setIsLoadingCategories(true);
-      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1500)); 
       setProducts(mockProducts); 
       setIsLoading(false);
-      setIsLoadingCategories(false); // Categories are derived from products, so set this after products load
+      setIsLoadingCategories(false);
     };
     fetchProductsAndCategories();
   }, []);
 
   const uniqueCategories = useMemo(() => {
-    if (isLoadingCategories) return []; // Don't compute categories until products are loaded
+    if (isLoadingCategories) return [];
     const categoriesMap = new Map<string, ProductCategory>();
     products.forEach(product => {
       if (!categoriesMap.has(product.category)) {
@@ -117,11 +127,24 @@ export default function HomePage() {
       );
     }
     
-    // Default sort by popularity
-    filtered.sort((a, b) => b.popularity - a.popularity);
+    switch (sortOption) {
+      case 'price-asc':
+        filtered.sort((a, b) => a.price - b.price);
+        break;
+      case 'price-desc':
+        filtered.sort((a, b) => b.price - a.price);
+        break;
+      case 'name-asc':
+        filtered.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+      case 'popularity':
+      default:
+        filtered.sort((a, b) => b.popularity - a.popularity);
+        break;
+    }
     
     return filtered;
-  }, [products, searchTermFromUrl, isLoading]);
+  }, [products, searchTermFromUrl, isLoading, sortOption]);
 
   return (
     <div className="space-y-16">
@@ -135,8 +158,22 @@ export default function HomePage() {
       <FeaturesSection />
 
       <div id="products-grid" className="space-y-8">
-        <div className="flex flex-col md:flex-row justify-end items-center gap-4 p-4 border-b border-border">
-          {/* Sort functionality can be added here if needed */}
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4 p-4 border-b border-border">
+          <h2 className="text-2xl font-headline font-semibold text-foreground">Our Products</h2>
+          <div className="flex items-center gap-2">
+            <Label htmlFor="sort-products" className="text-sm text-muted-foreground whitespace-nowrap">Sort by:</Label>
+            <Select value={sortOption} onValueChange={(value) => setSortOption(value as SortOption)} name="sort-products">
+              <SelectTrigger className="w-[180px] sm:w-[200px]">
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="popularity">Popularity</SelectItem>
+                <SelectItem value="price-asc">Price: Low to High</SelectItem>
+                <SelectItem value="price-desc">Price: High to Low</SelectItem>
+                <SelectItem value="name-asc">Name: A-Z</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         {isLoading ? (

@@ -2,22 +2,24 @@
 "use client";
 
 import Link from 'next/link';
-import { Home, ShoppingBag, User, Menu, Search } from 'lucide-react';
+import { Home, ShoppingBag, User, Menu, Search, LogIn, LogOut, UserPlus } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/context/AuthContext'; // Import useAuth
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
 import { useIsMobile } from '@/hooks/use-mobile';
 import React, { useState, useEffect, type ChangeEvent } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
+import { Separator } from '../ui/separator';
 
-const navItems = [
-  { href: '/', label: 'Home', icon: Home },
-  { href: '/profile', label: 'Profile', icon: User },
+const baseNavItems = [
+  { href: '/', label: 'Home', icon: Home, requiresAuth: false },
 ];
 
 export function NavMenu() {
   const { itemCount, setIsCartOpen } = useCart();
+  const { currentUser, signOut, loading } = useAuth(); // Get currentUser and signOut
   const isMobile = useIsMobile();
 
   const router = useRouter();
@@ -26,7 +28,6 @@ export function NavMenu() {
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
 
   useEffect(() => {
-    // Sync searchQuery with URL if it changes from outside (e.g. browser back/forward)
     setSearchQuery(searchParams.get('q') || '');
   }, [searchParams]);
 
@@ -40,7 +41,6 @@ export function NavMenu() {
     } else {
       params.delete('q');
     }
-    // Always navigate to home page with search query, using replace to avoid excessive history
     router.replace(`/?${params.toString()}`);
   };
   
@@ -76,16 +76,91 @@ export function NavMenu() {
       </div>
   );
 
+  const renderNavItems = (isMobileLayout: boolean) => {
+    const linkClass = isMobileLayout ? mobileLinkClasses : desktopLinkClasses;
+    const items = [...baseNavItems];
+    if (currentUser) {
+      items.push({ href: '/profile', label: 'Profile', icon: User, requiresAuth: true });
+    }
+
+    return items.map((item) => {
+      if (isMobileLayout) {
+        return (
+          <SheetClose asChild key={item.label}>
+            <Link href={item.href} className={linkClass}>
+              <item.icon className="h-5 w-5" />
+              {item.label}
+            </Link>
+          </SheetClose>
+        );
+      }
+      return (
+        <Link key={item.label} href={item.href} className={linkClass}>
+          <item.icon className="h-4 w-4" />
+          {item.label}
+        </Link>
+      );
+    });
+  };
+
+
+  const AuthButtonsDesktop = () => (
+    <>
+      {currentUser ? (
+        <Button variant="ghost" onClick={signOut} className={desktopLinkClasses}>
+          <LogOut className="h-4 w-4" />
+          Logout
+        </Button>
+      ) : (
+        <>
+          <Link href="/login" className={desktopLinkClasses}>
+            <LogIn className="h-4 w-4" />
+            Login
+          </Link>
+          <Link href="/register" className={desktopLinkClasses}>
+            <UserPlus className="h-4 w-4" />
+            Register
+          </Link>
+        </>
+      )}
+    </>
+  );
+
+  const AuthButtonsMobile = () => (
+     <>
+      {currentUser ? (
+        <SheetClose asChild>
+            <button onClick={signOut} className={`${mobileLinkClasses} text-left`}>
+              <LogOut className="h-5 w-5" />
+              Logout
+            </button>
+        </SheetClose>
+      ) : (
+        <>
+          <SheetClose asChild>
+            <Link href="/login" className={mobileLinkClasses}>
+              <LogIn className="h-5 w-5" />
+              Login
+            </Link>
+          </SheetClose>
+          <SheetClose asChild>
+            <Link href="/register" className={mobileLinkClasses}>
+              <UserPlus className="h-5 w-5" />
+              Register
+            </Link>
+          </SheetClose>
+        </>
+      )}
+    </>
+  );
+
+
   const DesktopNav = () => (
     <nav className="flex items-center">
       <SearchInputDesktop />
       <div className="flex items-center space-x-1 md:space-x-2 ml-2">
-        {navItems.map((item) => (
-          <Link key={item.label} href={item.href} className={desktopLinkClasses}>
-            <item.icon className="h-4 w-4" />
-            {item.label}
-          </Link>
-        ))}
+        {renderNavItems(false)}
+        {!loading && <AuthButtonsDesktop />}
         <Button variant="ghost" onClick={() => setIsCartOpen(true)} className={desktopLinkClasses}>
           <ShoppingBag className="h-4 w-4" />
           Cart ({itemCount})
@@ -111,26 +186,34 @@ export function NavMenu() {
         </div>
         <SearchInputMobile />
         <nav className="flex-grow p-4 space-y-2">
-          {navItems.map((item) => (
-            <SheetClose asChild key={item.label}>
-              <Link href={item.href} className={mobileLinkClasses}>
-                <item.icon className="h-5 w-5" />
-                {item.label}
-              </Link>
-            </SheetClose>
-          ))}
+          {renderNavItems(true)}
            <SheetClose asChild>
               <button onClick={() => { setIsCartOpen(true); }} className={`${mobileLinkClasses} text-left`}>
                   <ShoppingBag className="h-5 w-5" />
                   Cart ({itemCount})
               </button>
           </SheetClose>
+          {!loading && (
+            <>
+              <Separator className="my-2" />
+              <AuthButtonsMobile />
+            </>
+          )}
         </nav>
       </SheetContent>
     </Sheet>
   );
   
-  if (isMobile === undefined) return null;
+  if (isMobile === undefined || loading) { // Also return null if auth is loading to prevent flicker
+    // You might want a skeleton loader here for better UX during initial auth check
+    return (
+       <div className="flex items-center space-x-1 md:space-x-2 ml-2">
+        <div className="h-8 w-20 bg-muted rounded-md animate-pulse md:ml-4"></div> {/* Search skeleton */}
+        <div className="h-8 w-16 bg-muted rounded-md animate-pulse"></div> {/* Nav item skeleton */}
+        <div className="h-8 w-16 bg-muted rounded-md animate-pulse"></div> {/* Auth/Cart skeleton */}
+      </div>
+    );
+  }
 
   return isMobile ? <MobileNav /> : <DesktopNav />;
 }

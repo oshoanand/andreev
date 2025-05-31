@@ -1,22 +1,44 @@
+
 "use client";
 
-import { mockCustomer, mockOrders } from '@/lib/mock-data';
-import type { Customer, Order } from '@/lib/types';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
+import { mockOrders } from '@/lib/mock-data'; // Order data remains mock for now
+import type { Order } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
-import { Package, UserCircle, Mail, MapPin } from 'lucide-react';
+import { Package, Mail, MapPin, UserCircle, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { format } from 'date-fns';
 
-function getInitials(name: string) {
-  return name.split(' ').map(n => n[0]).join('').toUpperCase();
+function getInitials(name: string = "User") { // Default to "User" if name is not available
+  return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2);
 }
 
 export default function ProfilePage() {
-  const customer: Customer = mockCustomer; // In a real app, fetch this
-  const orders: Order[] = mockOrders; // In a real app, fetch this
+  const { currentUser, loading, signOut } = useAuth();
+  const router = useRouter();
+  const orders: Order[] = mockOrders; // In a real app, fetch this based on currentUser.uid
+
+  useEffect(() => {
+    if (!loading && !currentUser) {
+      router.push('/login?redirect=/profile');
+    }
+  }, [currentUser, loading, router]);
+
+  if (loading || !currentUser) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-20rem)] text-center px-4">
+        <Loader2 className="h-16 w-16 text-primary animate-spin mb-6" />
+        <p className="text-xl text-muted-foreground">Loading profile...</p>
+      </div>
+    );
+  }
+
+  const displayName = currentUser.displayName || currentUser.email?.split('@')[0] || "Valued Customer";
 
   return (
     <div className="space-y-10">
@@ -25,25 +47,34 @@ export default function ProfilePage() {
         <Card className="max-w-2xl mx-auto shadow-lg">
           <CardHeader className="flex flex-col sm:flex-row items-center gap-6 p-6">
             <Avatar className="h-24 w-24 text-3xl">
-              <AvatarImage src="https://placehold.co/100x100.png" alt={customer.name} data-ai-hint="profile avatar" />
-              <AvatarFallback>{getInitials(customer.name)}</AvatarFallback>
+              {currentUser.photoURL ? (
+                <AvatarImage src={currentUser.photoURL} alt={displayName} />
+              ) : (
+                <AvatarImage src="https://placehold.co/100x100.png" alt={displayName} data-ai-hint="profile avatar" />
+              )}
+              <AvatarFallback>{getInitials(displayName)}</AvatarFallback>
             </Avatar>
             <div className="text-center sm:text-left">
-              <CardTitle className="text-2xl font-headline">{customer.name}</CardTitle>
-              <CardDescription className="text-muted-foreground">Welcome back, {customer.name.split(' ')[0]}!</CardDescription>
+              <CardTitle className="text-2xl font-headline">{displayName}</CardTitle>
+              <CardDescription className="text-muted-foreground">Welcome back!</CardDescription>
             </div>
           </CardHeader>
           <Separator />
           <CardContent className="p-6 space-y-4">
             <div className="flex items-center gap-3">
               <Mail className="h-5 w-5 text-primary" />
-              <span className="text-foreground">{customer.email}</span>
+              <span className="text-foreground">{currentUser.email}</span>
             </div>
             <div className="flex items-center gap-3">
               <MapPin className="h-5 w-5 text-primary" />
-              <span className="text-foreground">{customer.address}</span>
+              <span className="text-muted-foreground italic">Shipping address not set up. (Demo)</span>
             </div>
-            <Button variant="outline" className="w-full sm:w-auto mt-4">Edit Profile (mock)</Button>
+            <Button variant="outline" className="w-full sm:w-auto mt-4" onClick={() => alert('Edit profile functionality not implemented yet.')}>
+              Edit Profile (mock)
+            </Button>
+             <Button variant="destructive" className="w-full sm:w-auto mt-4 sm:ml-2" onClick={signOut}>
+              Logout
+            </Button>
           </CardContent>
         </Card>
       </section>
@@ -51,7 +82,7 @@ export default function ProfilePage() {
       <Separator />
 
       <section>
-        <h2 className="text-2xl font-bold font-headline mb-6 text-center">Order History</h2>
+        <h2 className="text-2xl font-bold font-headline mb-6 text-center">Order History (Mock Data)</h2>
         {orders.length > 0 ? (
           <div className="space-y-6">
             {orders.map((order) => (
@@ -82,9 +113,6 @@ export default function ProfilePage() {
                   <Separator />
                   <p className="text-right font-semibold mt-3">Total: ${order.totalAmount.toFixed(2)}</p>
                 </CardContent>
-                {/* <CardFooter>
-                  <Button variant="outline" size="sm">View Details (mock)</Button>
-                </CardFooter> */}
               </Card>
             ))}
           </div>

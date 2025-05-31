@@ -111,20 +111,14 @@ export default function RegisterPage() {
                           onBlur={field.onBlur}
                           name={field.name}
                           disabled={field.disabled || isLoading}
-                        >
-                          {(inputProps: any) => (
-                            <input
-                              {...inputProps}
-                              ref={field.ref}
-                              type="tel"
-                              placeholder="+7 (___) ___-__-__"
-                              className={cn(
-                                "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
-                                "pl-12" // Adjusted padding for wider flag
-                              )}
-                            />
+                          inputRef={field.ref} // Pass react-hook-form's ref to InputMask's inputRef prop
+                          type="tel"
+                          placeholder="+7 (___) ___-__-__"
+                          className={cn(
+                            "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+                            "pl-12" // Adjusted padding for wider flag
                           )}
-                        </InputMask>
+                        />
                       </div>
                     </FormControl>
                     <FormMessage />

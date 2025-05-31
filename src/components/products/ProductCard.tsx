@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { ShoppingBag, Check } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 
@@ -17,16 +18,22 @@ export function ProductCard({ product }: ProductCardProps) {
   const isInCart = cartItems.some(item => item.product.id === product.id);
 
   const handleAddToCart = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault(); // Prevent link navigation if card is wrapped in Link
+    e.preventDefault(); 
     if (!isInCart) {
       addToCart(product);
     }
   };
 
+  const hasDiscount = product.originalPrice && product.originalPrice > product.price;
+  let discountPercent = 0;
+  if (hasDiscount && product.originalPrice) {
+    discountPercent = Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100);
+  }
+
   return (
     <Card className="overflow-hidden transition-shadow duration-300 flex flex-col h-full border">
       <Link href={`/products/${product.id}`} className="block">
-        <CardHeader className="p-0">
+        <CardHeader className="p-0 relative"> {/* Made CardHeader relative */}
           <div className="aspect-[4/3] relative w-full">
             <Image
               src={product.imageUrl}
@@ -37,6 +44,14 @@ export function ProductCard({ product }: ProductCardProps) {
               data-ai-hint={`${product.category} product`}
             />
           </div>
+          {hasDiscount && (
+            <Badge
+              variant="default" // Or "destructive" or a custom variant
+              className="absolute top-2 right-2 bg-primary text-primary-foreground"
+            >
+              {discountPercent}% OFF
+            </Badge>
+          )}
         </CardHeader>
       </Link>
       <CardContent className="p-4 flex-grow">
@@ -44,7 +59,12 @@ export function ProductCard({ product }: ProductCardProps) {
           <CardTitle className="text-lg font-headline mb-1 hover:text-primary transition-colors">{product.name}</CardTitle>
         </Link>
         <CardDescription className="text-sm text-muted-foreground mb-2 line-clamp-2">{product.description}</CardDescription>
-        <p className="text-lg font-semibold text-foreground">${product.price.toFixed(2)}</p>
+        <div className="flex items-baseline gap-2">
+          <p className="text-lg font-semibold text-foreground">${product.price.toFixed(2)}</p>
+          {hasDiscount && product.originalPrice && (
+            <p className="text-sm text-muted-foreground line-through">${product.originalPrice.toFixed(2)}</p>
+          )}
+        </div>
       </CardContent>
       <CardFooter className="p-4 border-t border-border bg-muted/30">
         {isInCart ? (

@@ -5,7 +5,8 @@ export const mockProducts: Product[] = [
     id: '1',
     name: 'Elegant Rose Gold Watch',
     description: 'A stunning timepiece with a minimalist design, featuring a rose gold plated case and a soft leather strap. Perfect for everyday elegance.',
-    price: 199.99,
+    price: 159.99, // Discounted price
+    originalPrice: 199.99, // Original price
     imageUrl: 'https://placehold.co/600x400.png',
     category: 'Accessories',
     popularity: 95,
@@ -32,7 +33,8 @@ export const mockProducts: Product[] = [
     id: '4',
     name: 'Leather Tote Bag',
     description: 'A spacious and durable tote bag made from ethically sourced leather. Features an internal pocket and a secure magnetic clasp.',
-    price: 120.00,
+    price: 90.00, // Discounted price
+    originalPrice: 120.00, // Original price
     imageUrl: 'https://placehold.co/600x400.png',
     category: 'Accessories',
     popularity: 70,
@@ -68,19 +70,19 @@ export const mockOrders: Order[] = [
   {
     id: 'order_001',
     items: [
-      { product: mockProducts[0], quantity: 1 },
-      { product: mockProducts[2], quantity: 2 },
+      { product: mockProducts.find(p => p.id === '1')!, quantity: 1 }, // Updated to find by ID to reflect potential price changes
+      { product: mockProducts.find(p => p.id === '3')!, quantity: 2 },
     ],
-    totalAmount: 199.99 + (35.00 * 2),
+    totalAmount: (mockProducts.find(p => p.id === '1')?.price || 0) + ((mockProducts.find(p => p.id === '3')?.price || 0) * 2),
     orderDate: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(), // 10 days ago
     status: 'Delivered',
   },
   {
     id: 'order_002',
     items: [
-      { product: mockProducts[1], quantity: 1 },
+      { product: mockProducts.find(p => p.id === '2')!, quantity: 1 },
     ],
-    totalAmount: 49.99,
+    totalAmount: (mockProducts.find(p => p.id === '2')?.price || 0),
     orderDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
     status: 'Shipped',
   },

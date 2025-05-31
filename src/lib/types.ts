@@ -3,6 +3,7 @@ export interface Product {
   name: string;
   description: string;
   price: number;
+  originalPrice?: number; // Added for discount display
   imageUrl: string;
   category: string;
   popularity: number; // Higher is more popular

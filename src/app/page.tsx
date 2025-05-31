@@ -16,7 +16,7 @@ import Link from 'next/link';
 const HeroSection = () => {
   return (
     <motion.section
-      className="relative rounded-lg shadow-xl overflow-hidden bg-gradient-to-br from-primary/20 via-background to-accent/20 dark:from-primary/30 dark:via-background dark:to-accent/30"
+      className="relative rounded-lg overflow-hidden bg-gradient-to-br from-primary/20 via-background to-accent/20 dark:from-primary/30 dark:via-background dark:to-accent/30"
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.7, ease: "easeOut" }}

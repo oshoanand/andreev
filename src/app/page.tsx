@@ -6,6 +6,7 @@ import type { Product, ProductCategory } from '@/lib/types';
 import { ProductCard } from '@/components/products/ProductCard';
 import { ProductCardSkeleton } from '@/components/products/ProductCardSkeleton';
 import { CategoryFilter } from '@/components/products/CategoryFilter';
+import { FeaturesSection } from '@/components/home/FeaturesSection'; // Added import
 import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -137,15 +138,17 @@ export default function HomePage() {
   }, [products, searchTermFromUrl, categoryFromUrl, isLoading]);
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-16"> {/* Increased spacing */}
       <HeroSection />
 
       <CategoryFilter 
         categories={uniqueCategories}
         selectedCategory={categoryFromUrl}
         onSelectCategory={handleSelectCategory}
-        isLoading={isLoading} // Pass loading state if CategoryFilter needs to show skeletons
+        isLoading={isLoading} 
       />
+
+      <FeaturesSection /> {/* Added Features Section */}
 
       <div id="products-grid" className="space-y-8">
         <div className="flex flex-col md:flex-row justify-end items-center gap-4 p-4 border-b border-border">
@@ -154,7 +157,7 @@ export default function HomePage() {
 
         {isLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {Array.from({ length: 8 }).map((_, index) => ( // Show 8 skeletons
+            {Array.from({ length: 8 }).map((_, index) => ( 
               <ProductCardSkeleton key={index} />
             ))}
           </div>

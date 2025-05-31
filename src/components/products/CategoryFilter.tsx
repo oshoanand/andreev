@@ -37,12 +37,12 @@ export function CategoryFilter({ categories, selectedCategory, onSelectCategory 
           {displayCategories.map((category) => (
             <Button
               key={category.name}
-              variant="outline"
+              variant="ghost" // Changed from outline
               onClick={() => onSelectCategory(category.name === 'All' ? null : category.name)}
               className={cn(
                 "h-24 w-24 p-2 flex flex-col items-center justify-center space-y-1 rounded-full shadow-sm hover:shadow-md transition-all duration-200",
-                "bg-card hover:bg-muted/80 border-border",
-                (selectedCategory === category.name || (selectedCategory === null && category.name === 'All')) && "ring-2 ring-primary border-primary bg-primary/10 hover:bg-primary/20"
+                "bg-card hover:bg-muted/80", // Removed border-border
+                (selectedCategory === category.name || (selectedCategory === null && category.name === 'All')) && "ring-2 ring-primary bg-primary/10 hover:bg-primary/20" // Removed border-primary
               )}
             >
               <div className="relative w-14 h-14 rounded-full overflow-hidden bg-muted flex items-center justify-center">
@@ -68,4 +68,3 @@ export function CategoryFilter({ categories, selectedCategory, onSelectCategory 
     </motion.div>
   );
 }
-

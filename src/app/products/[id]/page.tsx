@@ -1,6 +1,7 @@
 
 "use client"; 
 
+import type { Metadata, ResolvingMetadata } from 'next';
 import { mockProducts } from '@/lib/mock-data';
 import type { Product } from '@/lib/types';
 import Image from 'next/image';
@@ -12,7 +13,7 @@ import { Star, XCircle } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { useCart } from '@/context/CartContext'; // Import useCart
+import { useCart } from '@/context/CartContext'; 
 
 interface ProductPageProps {
   params: {
@@ -20,10 +21,114 @@ interface ProductPageProps {
   };
 }
 
+// Placeholder for your site's base URL. Replace with your actual domain.
+const SITE_BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.your-ecommerce-site.com';
+
+
+export async function generateMetadata(
+  { params }: ProductPageProps,
+  parent: ResolvingMetadata
+): Promise<Metadata> {
+  const productId = params.id;
+  const product: Product | undefined = mockProducts.find(p => p.id === productId);
+
+  if (!product) {
+    // In a real app, you might fetch from a DB and throw an error or return default metadata.
+    // For now, if product not found by mock, let the page component handle `notFound()`.
+    // Or return some default metadata:
+    return {
+      title: "Product Not Found",
+      description: "The product you are looking for does not exist.",
+    };
+  }
+
+  const siteName = "Shopify Mini"; // Or fetch from a global config
+  const productUrl = `${SITE_BASE_URL}/products/${product.id}`;
+  
+  // Truncate description for meta tags
+  const metaDescription = product.description.length > 155 
+    ? product.description.substring(0, 152) + "..." 
+    : product.description;
+
+  // Basic keywords
+  const keywords = [product.name, product.category, product.subCategory, siteName].filter(Boolean).join(', ');
+
+  // Calculate average rating for schema.org
+  const averageRatingValue = Math.max(0, Math.min(5, parseFloat((product.popularity / 20).toFixed(1))));
+
+
+  const jsonLd = {
+    "@context": "https://schema.org/",
+    "@type": "Product",
+    "name": product.name,
+    "description": product.description,
+    "image": product.imageUrl, // Can be an array of image URLs
+    "sku": product.id,
+    // "mpn": product.id, // Manufacturer Part Number, if applicable
+    // "brand": { // If brand information is available
+    //   "@type": "Brand",
+    //   "name": product.brandName || siteName 
+    // },
+    "offers": {
+      "@type": "Offer",
+      "priceCurrency": "USD", // Assuming USD, make dynamic if needed
+      "price": product.price.toFixed(2),
+      "url": productUrl,
+      "availability": product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      // "priceValidUntil": new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0], // Example: valid for 1 year
+    },
+    ...(product.popularity > 0 && averageRatingValue > 0 && {
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": averageRatingValue.toString(),
+        "reviewCount": product.popularity.toString() // Using popularity as a proxy for review count
+      }
+    })
+  };
+
+  return {
+    title: `${product.name} | ${product.category} - ${siteName}`,
+    description: metaDescription,
+    keywords: keywords,
+    alternates: {
+      canonical: productUrl,
+    },
+    openGraph: {
+      title: `${product.name} - ${siteName}`,
+      description: metaDescription,
+      url: productUrl,
+      siteName: siteName,
+      images: [
+        {
+          url: product.imageUrl, // Ensure this is an absolute URL
+          width: 600, // Provide image dimensions if known
+          height: 400,
+          alt: product.name,
+        },
+      ],
+      locale: 'en_US', // Adjust if your site is multi-lingual
+      type: 'product', // More specific for e-commerce product
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${product.name} - ${siteName}`,
+      description: metaDescription,
+      images: [product.imageUrl], // Ensure this is an absolute URL
+      // site: '@yourTwitterHandle', // Optional: Your Twitter username
+      // creator: '@creatorTwitterHandle', // Optional: Creator's Twitter username
+    },
+    // For JSON-LD structured data
+    other: {
+      'application/ld+json': JSON.stringify(jsonLd),
+    },
+  };
+}
+
+
 export default function ProductPage({ params }: { params: { id: string } }) {
   const productId = params.id;
   const product: Product | undefined = mockProducts.find(p => p.id === productId);
-  const { cartItems } = useCart(); // Get cartItems to check if item is in cart
+  const { cartItems } = useCart(); 
 
   if (!product) {
     notFound();
@@ -38,7 +143,7 @@ export default function ProductPage({ params }: { params: { id: string } }) {
   return (
     <div className="max-w-4xl mx-auto">
       <div className="mb-4 text-sm text-muted-foreground">
-        <Link href="/" className="hover:text-primary">Home</Link> / <span className="text-foreground">{product.name}</span>
+        <Link href="/" className="hover:text-primary">Home</Link> / <Link href={`/category/${encodeURIComponent(product.category)}`} className="hover:text-primary">{product.category}</Link> / <span className="text-foreground">{product.name}</span>
       </div>
       <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-start">
         <div className={`aspect-square relative rounded-lg overflow-hidden shadow-lg bg-card ${isOutOfStock ? 'opacity-70' : ''}`}>
@@ -169,4 +274,3 @@ export default function ProductPage({ params }: { params: { id: string } }) {
     </div>
   );
 }
-

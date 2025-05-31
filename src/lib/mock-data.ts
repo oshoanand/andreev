@@ -10,6 +10,8 @@ export const mockProducts: Product[] = [
     originalPrice: 199.99,
     imageUrl: 'https://placehold.co/600x400.png',
     category: 'Accessories',
+    subCategory: 'Watches',
+    sizes: ['One Size'],
     popularity: 95,
     stock: 10,
   },
@@ -20,6 +22,8 @@ export const mockProducts: Product[] = [
     price: 49.99,
     imageUrl: 'https://placehold.co/600x400.png',
     category: 'Apparel',
+    subCategory: 'Scarves & Wraps',
+    sizes: ['One Size'],
     popularity: 88,
     stock: 5,
   },
@@ -30,6 +34,7 @@ export const mockProducts: Product[] = [
     price: 35.00,
     imageUrl: 'https://placehold.co/600x400.png',
     category: 'Home Goods',
+    subCategory: 'Drinkware',
     popularity: 92,
     stock: 0, // Out of stock
   },
@@ -41,6 +46,8 @@ export const mockProducts: Product[] = [
     originalPrice: 120.00,
     imageUrl: 'https://placehold.co/600x400.png',
     category: 'Accessories',
+    subCategory: 'Bags',
+    sizes: ['Large', 'Medium'],
     popularity: 70,
     stock: 15,
   },
@@ -51,6 +58,7 @@ export const mockProducts: Product[] = [
     price: 75.50,
     imageUrl: 'https://placehold.co/600x400.png',
     category: 'Home Goods',
+    subCategory: 'Lighting',
     popularity: 85,
     stock: 0, // Out of stock
   },
@@ -61,8 +69,33 @@ export const mockProducts: Product[] = [
     price: 89.00,
     imageUrl: 'https://placehold.co/600x400.png',
     category: 'Apparel',
+    subCategory: 'Tops',
+    sizes: ['S', 'M', 'L', 'XL'],
     popularity: 90,
     stock: 8,
+  },
+  {
+    id: '7',
+    name: 'Linen Trousers',
+    description: 'Comfortable and breathable linen trousers, perfect for warm weather. Available in a natural beige color.',
+    price: 65.00,
+    imageUrl: 'https://placehold.co/600x400.png',
+    category: 'Apparel',
+    subCategory: 'Bottoms',
+    sizes: ['S', 'M', 'L'],
+    popularity: 82,
+    stock: 12,
+  },
+  {
+    id: '8',
+    name: 'Wooden Photo Frame',
+    description: 'A rustic wooden photo frame, fits a 5x7 photo. Great for displaying memories.',
+    price: 22.00,
+    imageUrl: 'https://placehold.co/600x400.png',
+    category: 'Home Goods',
+    subCategory: 'Decor',
+    popularity: 75,
+    stock: 20,
   },
 ];
 
@@ -78,12 +111,9 @@ export const mockOrders: Order[] = [
     id: 'order_001',
     items: [
       { product: mockProducts.find(p => p.id === '1')!, quantity: 1 },
-      // Note: If product '3' was in an order, it implies it was in stock when ordered.
-      // For simplicity, current mock orders don't include currently out-of-stock items.
-      // Consider how to handle historical orders with items now out of stock.
     ],
-    totalAmount: (mockProducts.find(p => p.id === '1')?.price || 0), // Simplified, adjust if more items
-    orderDate: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(), // 10 days ago
+    totalAmount: (mockProducts.find(p => p.id === '1')?.price || 0), 
+    orderDate: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(), 
     status: 'Delivered',
   },
   {
@@ -92,7 +122,8 @@ export const mockOrders: Order[] = [
       { product: mockProducts.find(p => p.id === '2')!, quantity: 1 },
     ],
     totalAmount: (mockProducts.find(p => p.id === '2')?.price || 0),
-    orderDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
+    orderDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), 
     status: 'Shipped',
   },
 ];
+

@@ -7,6 +7,8 @@ export interface Product {
   originalPrice?: number; // Added for discount display
   imageUrl: string;
   category: string;
+  subCategory?: string; // For filtering
+  sizes?: string[]; // For filtering e.g. ['S', 'M', 'L', 'One Size']
   popularity: number; // Higher is more popular
   stock: number; // Number of items in stock, 0 means out of stock
 }
@@ -37,3 +39,4 @@ export interface ProductCategory {
   imageUrl: string;
   dataAiHint: string;
 }
+

@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useRef } from "react"; // Import useRef
+import { useState } from "react"; 
 import InputMask from "react-input-mask";
 
 import { Button } from "@/components/ui/button";
@@ -18,7 +18,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } // Input is kept for other fields
+import { Input } 
 from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
@@ -93,7 +93,6 @@ export default function RegisterPage() {
                 control={form.control}
                 name="mobileNumber"
                 render={({ field }) => {
-                  const rawInputRef = useRef<HTMLInputElement | null>(null);
                   return (
                     <FormItem>
                       <FormLabel>Mobile Number</FormLabel>
@@ -106,14 +105,20 @@ export default function RegisterPage() {
                             onChange={field.onChange}
                             onBlur={field.onBlur}
                             disabled={isLoading}
-                            inputRef={rawInputRef} // Pass the ref to InputMask
+                            // No inputRef prop here
                           >
-                            {(inputProps: any) => (
+                            {(inputPropsFromMask: any) => ( // inputPropsFromMask contains the ref needed by InputMask
                               <input
-                                {...inputProps}
-                                ref={(node) => {
-                                  field.ref(node); // Call react-hook-form's ref function
-                                  rawInputRef.current = node; // Assign node to our own ref
+                                {...inputPropsFromMask} // Spread props from InputMask (includes its own ref, value, onChange etc.)
+                                ref={(instance) => {
+                                  field.ref(instance); // For React Hook Form
+                                  // Pass the instance to react-input-mask's ref if it exists
+                                  const maskRef = inputPropsFromMask.ref;
+                                  if (typeof maskRef === 'function') {
+                                    maskRef(instance);
+                                  } else if (maskRef && typeof maskRef === 'object') {
+                                    (maskRef as React.MutableRefObject<HTMLInputElement | null>).current = instance;
+                                  }
                                 }}
                                 type="tel"
                                 placeholder="(123) 456-7890"

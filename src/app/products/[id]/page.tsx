@@ -65,7 +65,7 @@ export async function generateMetadata(
   };
 
   return {
-    title: `${product.name} | ${product.category} - ${siteName}`,
+    title: `${product.name} - ${siteName}`, // Updated title format
     description: metaDescription,
     keywords: keywords,
     alternates: {
@@ -85,7 +85,7 @@ export async function generateMetadata(
         },
       ],
       locale: 'en_US', 
-      type: 'website', // Changed from 'object' to 'website'
+      type: 'website',
     },
     twitter: {
       card: 'summary_large_image',

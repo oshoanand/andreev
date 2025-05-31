@@ -7,6 +7,7 @@ import * as z from "zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react"; 
+import InputMask from "react-input-mask";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -17,16 +18,15 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/input"; // Still used for other fields
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
 import { Loader2, Mail, Lock } from "lucide-react"; 
+import { cn } from "@/lib/utils";
 
 const registerSchema = z.object({
   email: z.string().email({ message: "Invalid email address." }),
-  mobileNumber: z.string()
-    .min(10, { message: "Mobile number must be at least 10 digits." })
-    .regex(/^\d+$/, { message: "Mobile number must contain only digits." }),
+  mobileNumber: z.string().regex(/^\+7 \(\d{3}\) \d{3}-\d{2}-\d{2}$/, { message: "Invalid Russian mobile number. Expected format: +7 (XXX) XXX-XX-XX" }),
   password: z.string().min(6, { message: "Password must be at least 6 characters." }),
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
@@ -97,19 +97,34 @@ export default function RegisterPage() {
                         <svg 
                           xmlns="http://www.w3.org/2000/svg" 
                           viewBox="0 0 9 6" 
-                          className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-6 text-muted-foreground" // Adjusted width for flag aspect ratio
+                          className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-6 text-muted-foreground"
                           aria-hidden="true"
                         >
                           <rect width="9" height="2" y="0" fill="#fff"/>
                           <rect width="9" height="2" y="2" fill="#0039a6"/>
                           <rect width="9" height="2" y="4" fill="#d52b1e"/>
                         </svg>
-                        <Input 
-                          type="tel" 
-                          placeholder="1234567890" 
-                          {...field} 
-                          className="pl-12" // Increased padding for wider flag
-                        />
+                        <InputMask
+                          mask="+7 (999) 999-99-99"
+                          value={field.value || ''}
+                          onChange={field.onChange}
+                          onBlur={field.onBlur}
+                          name={field.name}
+                          disabled={field.disabled || isLoading}
+                        >
+                          {(inputProps: any) => (
+                            <input
+                              {...inputProps}
+                              ref={field.ref}
+                              type="tel"
+                              placeholder="+7 (___) ___-__-__"
+                              className={cn(
+                                "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+                                "pl-12" // Adjusted padding for wider flag
+                              )}
+                            />
+                          )}
+                        </InputMask>
                       </div>
                     </FormControl>
                     <FormMessage />

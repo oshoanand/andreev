@@ -85,7 +85,7 @@ export async function generateMetadata(
         },
       ],
       locale: 'en_US', 
-      type: 'object', // Changed from 'product' to 'object'
+      type: 'website', // Changed from 'object' to 'website'
     },
     twitter: {
       card: 'summary_large_image',
@@ -112,3 +112,4 @@ export default async function ProductPage({ params }: ProductPageProps) {
   // Pass the server-fetched product to the client component
   return <ProductDetailsClient product={product} />;
 }
+

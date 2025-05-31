@@ -1,9 +1,10 @@
+
 import type { Product } from '@/lib/types';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { ShoppingBag } from 'lucide-react';
+import { ShoppingBag, Check } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 
 interface ProductCardProps {
@@ -11,11 +12,15 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
-  const { addToCart } = useCart();
+  const { addToCart, cartItems } = useCart();
+
+  const isInCart = cartItems.some(item => item.product.id === product.id);
 
   const handleAddToCart = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault(); // Prevent link navigation if card is wrapped in Link
-    addToCart(product);
+    if (!isInCart) {
+      addToCart(product);
+    }
   };
 
   return (
@@ -42,9 +47,15 @@ export function ProductCard({ product }: ProductCardProps) {
         <p className="text-lg font-semibold text-foreground">${product.price.toFixed(2)}</p>
       </CardContent>
       <CardFooter className="p-4 border-t border-border bg-muted/30">
-        <Button onClick={handleAddToCart} className="w-full" variant="outline">
-          <ShoppingBag className="mr-2 h-4 w-4" /> Add to Cart
-        </Button>
+        {isInCart ? (
+          <Button className="w-full" variant="secondary" disabled>
+            <Check className="mr-2 h-4 w-4" /> In Cart
+          </Button>
+        ) : (
+          <Button onClick={handleAddToCart} className="w-full" variant="outline">
+            <ShoppingBag className="mr-2 h-4 w-4" /> Add to Cart
+          </Button>
+        )}
       </CardFooter>
     </Card>
   );

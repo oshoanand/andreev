@@ -40,7 +40,7 @@ export function CategoryFilter({ categories, selectedCategory, onSelectCategory 
               variant="outline"
               onClick={() => onSelectCategory(category.name === 'All' ? null : category.name)}
               className={cn(
-                "h-auto p-3 flex flex-col items-center space-y-2 w-28 min-w-[7rem] rounded-lg shadow-sm hover:shadow-md transition-all duration-200",
+                "h-auto p-3 flex flex-col items-center space-y-2 w-28 min-w-[7rem] rounded-xl shadow-sm hover:shadow-md transition-all duration-200", // Changed rounded-lg to rounded-xl
                 "bg-card hover:bg-muted/80 border-border",
                 (selectedCategory === category.name || (selectedCategory === null && category.name === 'All')) && "ring-2 ring-primary border-primary bg-primary/10 hover:bg-primary/20"
               )}

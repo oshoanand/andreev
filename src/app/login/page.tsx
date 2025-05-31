@@ -21,7 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, Mail, Lock } from "lucide-react"; // Added Mail and Lock
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Invalid email address." }),
@@ -94,7 +94,10 @@ export default function LoginPage() {
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input placeholder="you@example.com" {...field} />
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input placeholder="you@example.com" {...field} className="pl-10" />
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -107,7 +110,10 @@ export default function LoginPage() {
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input type="password" placeholder="••••••••" {...field} />
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input type="password" placeholder="••••••••" {...field} className="pl-10" />
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>

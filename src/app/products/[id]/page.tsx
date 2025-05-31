@@ -85,7 +85,7 @@ export async function generateMetadata(
         },
       ],
       locale: 'en_US', 
-      type: 'product', 
+      type: 'object', // Changed from 'product' to 'object'
     },
     twitter: {
       card: 'summary_large_image',

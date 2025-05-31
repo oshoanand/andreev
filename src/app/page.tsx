@@ -4,7 +4,6 @@
 import { mockProducts } from '@/lib/mock-data';
 import type { Product, ProductCategory } from '@/lib/types';
 import { ProductCard } from '@/components/products/ProductCard';
-import { SortProducts } from '@/components/products/SortProducts';
 import { CategoryFilter } from '@/components/products/CategoryFilter';
 import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
@@ -76,8 +75,6 @@ export default function HomePage() {
   const searchTermFromUrl = searchParams.get('q') || '';
   const categoryFromUrl = searchParams.get('category') || null;
   
-  const [sortOption, setSortOption] = useState('popularity');
-
   const uniqueCategories = useMemo(() => {
     const categoriesMap = new Map<string, ProductCategory>();
     mockProducts.forEach(product => {
@@ -91,7 +88,7 @@ export default function HomePage() {
       }
     });
     return Array.from(categoriesMap.values());
-  }, [mockProducts]);
+  }, []); // mockProducts is stable, so empty array is fine if mockProducts doesn't change.
 
   const handleSelectCategory = (categoryName: string | null) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -117,25 +114,11 @@ export default function HomePage() {
       products = products.filter(product => product.category === categoryFromUrl);
     }
 
-    switch (sortOption) {
-      case 'popularity':
-        products.sort((a, b) => b.popularity - a.popularity);
-        break;
-      case 'price-asc':
-        products.sort((a, b) => a.price - b.price);
-        break;
-      case 'price-desc':
-        products.sort((a, b) => b.price - a.price);
-        break;
-      case 'name-asc':
-        products.sort((a, b) => a.name.localeCompare(b.name));
-        break;
-      case 'name-desc':
-        products.sort((a, b) => b.name.localeCompare(a.name));
-        break;
-    }
+    // Default sort by popularity
+    products.sort((a, b) => b.popularity - a.popularity);
+    
     return products;
-  }, [mockProducts, searchTermFromUrl, categoryFromUrl, sortOption]);
+  }, [searchTermFromUrl, categoryFromUrl]); // mockProducts is stable
 
   return (
     <div className="space-y-12">
@@ -149,7 +132,7 @@ export default function HomePage() {
 
       <div id="products-grid" className="space-y-8">
         <div className="flex flex-col md:flex-row justify-end items-center gap-4 p-4 border-b border-border">
-          <SortProducts onSortChange={setSortOption} currentSort={sortOption} />
+          {/* SortProducts component removed */}
         </div>
 
         {filteredAndSortedProducts.length > 0 ? (

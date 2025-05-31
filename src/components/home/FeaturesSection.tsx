@@ -54,7 +54,7 @@ export function FeaturesSection() {
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {features.map((feature, index) => (
-            <motion.custom
+            <motion.div
               key={feature.title}
               custom={index}
               initial="hidden"
@@ -62,11 +62,6 @@ export function FeaturesSection() {
               viewport={{ once: true, amount: 0.3 }}
               variants={cardVariants}
               className="w-full"
-              // The `custom` prop for motion components should be of a compatible type.
-              // `motion.div` is a valid motion component that can accept the `custom` prop.
-              // We use motion.div instead of Card directly for animation, then nest Card inside.
-              // However, Card itself can be a motion component if we do `motion(Card)`.
-              // For simplicity and directness, let's wrap Card in a motion.div.
             >
               <Card className="text-center h-full shadow-md hover:shadow-lg transition-shadow duration-300 bg-card">
                 <CardHeader className="items-center">
@@ -79,7 +74,7 @@ export function FeaturesSection() {
                   <p className="text-sm text-muted-foreground">{feature.description}</p>
                 </CardContent>
               </Card>
-            </motion.custom>
+            </motion.div>
           ))}
         </div>
       </div>

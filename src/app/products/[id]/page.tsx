@@ -1,4 +1,5 @@
-"use client"; // This page uses client-side hooks for data fetching and cart interaction
+
+"use client"; 
 
 import { mockProducts } from '@/lib/mock-data';
 import type { Product } from '@/lib/types';
@@ -7,9 +8,11 @@ import { AddToCartButton } from '@/components/products/AddToCartButton';
 import { ProductRecommendations } from '@/components/products/ProductRecommendations';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Star } from 'lucide-react';
+import { Star, XCircle } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { useCart } from '@/context/CartContext'; // Import useCart
 
 interface ProductPageProps {
   params: {
@@ -17,19 +20,19 @@ interface ProductPageProps {
   };
 }
 
-// This is a client component, so we can't use async/await directly in the component function signature for data fetching.
-// Data fetching should happen in useEffect or a dedicated function.
-// For this mock setup, we'll find the product directly.
-
 export default function ProductPage({ params }: ProductPageProps) {
   const productId = params.id;
   const product: Product | undefined = mockProducts.find(p => p.id === productId);
+  const { cartItems } = useCart(); // Get cartItems to check if item is in cart
 
   if (!product) {
-    notFound(); // Triggers the not-found.tsx or default Next.js 404 page
+    notFound();
   }
   
-  const averageRating = (product.popularity / 20).toFixed(1); // Mock rating based on popularity
+  const averageRating = (product.popularity / 20).toFixed(1);
+  const isOutOfStock = product.stock === 0;
+  const isInCart = cartItems.some(item => item.product.id === product.id && !isOutOfStock);
+
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -37,16 +40,21 @@ export default function ProductPage({ params }: ProductPageProps) {
         <Link href="/" className="hover:text-primary">Home</Link> / <span className="text-foreground">{product.name}</span>
       </div>
       <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-start">
-        <div className="aspect-square relative rounded-lg overflow-hidden shadow-lg bg-card">
+        <div className={`aspect-square relative rounded-lg overflow-hidden shadow-lg bg-card ${isOutOfStock ? 'opacity-70' : ''}`}>
           <Image
             src={product.imageUrl}
             alt={product.name}
             fill
-            priority // Prioritize loading of the main product image
+            priority
             sizes="(max-width: 768px) 100vw, 50vw"
-            className="object-cover transition-transform duration-300 hover:scale-105"
+            className={`object-cover transition-transform duration-300 hover:scale-105 ${isOutOfStock ? 'grayscale' : ''}`}
             data-ai-hint={`${product.category} product detail`}
           />
+           {isOutOfStock && (
+            <Badge variant="destructive" className="absolute top-4 left-4 text-base px-3 py-1">
+              Out of Stock
+            </Badge>
+          )}
         </div>
 
         <div className="space-y-6">
@@ -70,14 +78,31 @@ export default function ProductPage({ params }: ProductPageProps) {
 
           <p className="text-2xl font-semibold text-foreground">${product.price.toFixed(2)}</p>
           
+          {product.originalPrice && product.originalPrice > product.price && (
+            <p className="text-lg text-muted-foreground line-through">
+              Was ${product.originalPrice.toFixed(2)}
+            </p>
+          )}
+
           <Separator />
 
           <div>
             <h2 className="text-xl font-semibold font-headline mb-2">Description</h2>
             <p className="text-muted-foreground leading-relaxed">{product.description}</p>
           </div>
-          
-          <AddToCartButton product={product} size="lg" className="w-full md:w-auto" />
+
+          {isOutOfStock ? (
+             <div className="p-4 border border-destructive/50 bg-destructive/10 rounded-md text-center text-destructive">
+                <XCircle className="inline-block mr-2 h-5 w-5" />
+                Currently unavailable
+            </div>
+          ) : isInCart ? (
+             <Button size="lg" className="w-full md:w-auto" variant="secondary" disabled>
+                In Cart
+            </Button>
+          ) : (
+            <AddToCartButton product={product} size="lg" className="w-full md:w-auto" />
+          )}
         </div>
       </div>
       <ProductRecommendations currentProductId={product.id} />

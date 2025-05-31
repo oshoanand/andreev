@@ -1,3 +1,4 @@
+
 export interface Product {
   id: string;
   name: string;
@@ -7,6 +8,7 @@ export interface Product {
   imageUrl: string;
   category: string;
   popularity: number; // Higher is more popular
+  stock: number; // Number of items in stock, 0 means out of stock
 }
 
 export interface CartItem {

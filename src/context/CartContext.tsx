@@ -25,7 +25,6 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const { toast } = useToast();
 
-  // Load cart from localStorage on initial render
   useEffect(() => {
     const storedCart = localStorage.getItem('shopifyMiniCart');
     if (storedCart) {
@@ -33,22 +32,48 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-  // Save cart to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem('shopifyMiniCart', JSON.stringify(cartItems));
   }, [cartItems]);
 
   const addToCart = (product: Product, quantity: number = 1) => {
+    if (product.stock === 0) {
+      toast({
+        title: "Out of Stock",
+        description: `${product.name} is currently unavailable.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
     setCartItems((prevItems) => {
       const existingItem = prevItems.find((item) => item.product.id === product.id);
       if (existingItem) {
+        // Ensure cart quantity does not exceed stock
+        const newQuantity = Math.min(existingItem.quantity + quantity, product.stock);
+         if (newQuantity < existingItem.quantity + quantity) {
+           toast({
+            title: "Limited Stock",
+            description: `Only ${product.stock - existingItem.quantity} more of ${product.name} can be added.`,
+            variant: "default" // or "warning" if you had one
+          });
+        }
         return prevItems.map((item) =>
           item.product.id === product.id
-            ? { ...item, quantity: item.quantity + quantity }
+            ? { ...item, quantity: newQuantity }
             : item
         );
       }
-      return [...prevItems, { product, quantity: Math.max(1, quantity) }]; // Ensure at least 1 is added
+      // Ensure initial quantity does not exceed stock
+      const initialQuantity = Math.min(quantity, product.stock);
+      if (initialQuantity < quantity) {
+         toast({
+            title: "Limited Stock",
+            description: `Only ${product.stock} of ${product.name} available. Added ${initialQuantity} to cart.`,
+            variant: "default"
+          });
+      }
+      return [...prevItems, { product, quantity: Math.max(1, initialQuantity) }];
     });
     toast({
       title: "Item added to cart",
@@ -69,8 +94,21 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const updateQuantity = (productId: string, quantity: number) => {
-    // Ensure quantity does not go below 1. If it's 0 or less, it's handled by disabling the button or explicit removal.
-    const newQuantity = Math.max(1, quantity); 
+    const itemInCart = cartItems.find(item => item.product.id === productId);
+    if (!itemInCart) return;
+
+    // Ensure quantity does not go below 1
+    let newQuantity = Math.max(1, quantity); 
+    // Ensure quantity does not exceed stock
+    newQuantity = Math.min(newQuantity, itemInCart.product.stock);
+
+    if (quantity > itemInCart.product.stock) {
+        toast({
+            title: "Limited Stock",
+            description: `Only ${itemInCart.product.stock} of ${itemInCart.product.name} available.`,
+            variant: "default"
+        });
+    }
     
     setCartItems((prevItems) =>
       prevItems.map((item) =>

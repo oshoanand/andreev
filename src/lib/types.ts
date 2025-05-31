@@ -48,3 +48,14 @@ export interface ProductCategory {
   imageUrl: string;
   dataAiHint: string;
 }
+
+export interface UserFeedback {
+  id?: string; // Firestore document ID
+  rating: number; // 1-5
+  comments: string;
+  pageUrl: string;
+  userAgent?: string;
+  userId?: string | null;
+  userEmail?: string | null;
+  timestamp: Date; // Will be converted to Firestore Timestamp on save
+}

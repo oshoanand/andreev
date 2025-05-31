@@ -7,6 +7,7 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Toaster } from "@/components/ui/toaster";
 import { CartSidebar } from '@/components/cart/CartSidebar';
+import { FeedbackButton } from '@/components/feedback/FeedbackButton'; // Import FeedbackButton
 
 export const metadata: Metadata = {
   title: 'Shopify Mini',
@@ -35,6 +36,7 @@ export default function RootLayout({
             </main>
             <Footer />
             <Toaster />
+            <FeedbackButton /> {/* Add FeedbackButton here */}
           </CartProvider>
         </AuthProvider>
       </body>

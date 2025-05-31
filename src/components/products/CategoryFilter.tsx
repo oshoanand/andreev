@@ -3,18 +3,16 @@
 
 import type { ProductCategory } from '@/lib/types';
 import Image from 'next/image';
-import { Button } from '@/components/ui/button';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import { LayoutGrid } from 'lucide-react';
+import Link from 'next/link';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 
 interface CategoryFilterProps {
   categories: ProductCategory[];
-  selectedCategory: string | null;
-  onSelectCategory: (categoryName: string | null) => void;
-  isLoading?: boolean; // Added isLoading prop
+  isLoading?: boolean;
 }
 
 const CategorySkeleton = () => (
@@ -24,8 +22,7 @@ const CategorySkeleton = () => (
   </div>
 );
 
-
-export function CategoryFilter({ categories, selectedCategory, onSelectCategory, isLoading = false }: CategoryFilterProps) {
+export function CategoryFilter({ categories, isLoading = false }: CategoryFilterProps) {
   const allCategoriesOption: ProductCategory = {
     name: 'All',
     imageUrl: '', 
@@ -48,32 +45,37 @@ export function CategoryFilter({ categories, selectedCategory, onSelectCategory,
             Array.from({ length: 5 }).map((_, index) => <CategorySkeleton key={index} />)
           ) : (
             displayCategories.map((category) => (
-              <Button
+              <Link
                 key={category.name}
-                variant="ghost"
-                onClick={() => onSelectCategory(category.name === 'All' ? null : category.name)}
-                className={cn(
-                  "h-24 w-24 p-2 flex flex-col items-center justify-center space-y-1 rounded-full shadow-sm hover:shadow-md transition-all duration-200",
-                  "bg-card hover:bg-muted/80", 
-                  (selectedCategory === category.name || (selectedCategory === null && category.name === 'All')) && "ring-2 ring-primary bg-primary/10 hover:bg-primary/20"
-                )}
+                href={category.name === 'All' ? '/' : `/category/${encodeURIComponent(category.name)}`}
+                passHref
+                legacyBehavior // Recommended for custom component children like the div here
               >
-                <div className="relative w-14 h-14 rounded-full overflow-hidden bg-muted flex items-center justify-center">
-                  {category.name === 'All' ? (
-                    <LayoutGrid className="w-8 h-8 text-muted-foreground" />
-                  ) : (
-                    <Image
-                      src={category.imageUrl}
-                      alt={category.name}
-                      fill
-                      sizes="56px" 
-                      className="object-cover"
-                      data-ai-hint={category.dataAiHint}
-                    />
+                <a // Use an <a> tag for styling and semantics within Link
+                  className={cn(
+                    "h-24 w-24 p-2 flex flex-col items-center justify-center space-y-1 rounded-full shadow-sm hover:shadow-md transition-all duration-200",
+                    "bg-card hover:bg-muted/80 dark:bg-card dark:hover:bg-muted/70",
+                    // Basic focus styling, can be enhanced
+                    "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                   )}
-                </div>
-                <span className="text-xs font-medium text-foreground truncate w-full text-center">{category.name}</span>
-              </Button>
+                >
+                  <div className="relative w-14 h-14 rounded-full overflow-hidden bg-muted flex items-center justify-center">
+                    {category.name === 'All' ? (
+                      <LayoutGrid className="w-8 h-8 text-muted-foreground" />
+                    ) : (
+                      <Image
+                        src={category.imageUrl}
+                        alt={category.name}
+                        fill
+                        sizes="56px" 
+                        className="object-cover"
+                        data-ai-hint={category.dataAiHint}
+                      />
+                    )}
+                  </div>
+                  <span className="text-xs font-medium text-foreground truncate w-full text-center">{category.name}</span>
+                </a>
+              </Link>
             ))
           )}
         </div>

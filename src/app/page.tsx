@@ -6,9 +6,9 @@ import type { Product, ProductCategory } from '@/lib/types';
 import { ProductCard } from '@/components/products/ProductCard';
 import { ProductCardSkeleton } from '@/components/products/ProductCardSkeleton';
 import { CategoryFilter } from '@/components/products/CategoryFilter';
-import { FeaturesSection } from '@/components/home/FeaturesSection'; // Added import
+import { FeaturesSection } from '@/components/home/FeaturesSection';
 import { useState, useMemo, useEffect } from 'react';
-import { useSearchParams, useRouter, usePathname } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation'; // Removed usePathname as it's not used
 import { Button } from '@/components/ui/button';
 import { ShoppingCart } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -70,29 +70,29 @@ const HeroSection = () => {
 };
 
 export default function HomePage() {
-  const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
   
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true); // For category loading state
 
   const searchTermFromUrl = searchParams.get('q') || '';
-  const categoryFromUrl = searchParams.get('category') || null;
   
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchProductsAndCategories = async () => {
       setIsLoading(true);
+      setIsLoadingCategories(true);
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Adjust delay as needed
-      setProducts(mockProducts); // In a real app, this would be an API call: const data = await fetch('/api/products'); setProducts(await data.json());
+      await new Promise(resolve => setTimeout(resolve, 1500)); 
+      setProducts(mockProducts); 
       setIsLoading(false);
+      setIsLoadingCategories(false); // Categories are derived from products, so set this after products load
     };
-    fetchProducts();
+    fetchProductsAndCategories();
   }, []);
 
   const uniqueCategories = useMemo(() => {
-    if (isLoading) return []; // Don't compute categories until products are loaded
+    if (isLoadingCategories) return []; // Don't compute categories until products are loaded
     const categoriesMap = new Map<string, ProductCategory>();
     products.forEach(product => {
       if (!categoriesMap.has(product.category)) {
@@ -104,20 +104,10 @@ export default function HomePage() {
       }
     });
     return Array.from(categoriesMap.values());
-  }, [products, isLoading]);
-
-  const handleSelectCategory = (categoryName: string | null) => {
-    const params = new URLSearchParams(searchParams.toString());
-    if (categoryName) {
-      params.set('category', categoryName);
-    } else {
-      params.delete('category');
-    }
-    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-  };
+  }, [products, isLoadingCategories]);
   
   const filteredAndSortedProducts = useMemo(() => {
-    if (isLoading) return []; // Don't filter until products are loaded
+    if (isLoading) return [];
     let filtered = [...products];
 
     if (searchTermFromUrl) {
@@ -126,33 +116,27 @@ export default function HomePage() {
         product.description.toLowerCase().includes(searchTermFromUrl.toLowerCase())
       );
     }
-
-    if (categoryFromUrl) {
-      filtered = filtered.filter(product => product.category === categoryFromUrl);
-    }
-
+    
     // Default sort by popularity
     filtered.sort((a, b) => b.popularity - a.popularity);
     
     return filtered;
-  }, [products, searchTermFromUrl, categoryFromUrl, isLoading]);
+  }, [products, searchTermFromUrl, isLoading]);
 
   return (
-    <div className="space-y-16"> {/* Increased spacing */}
+    <div className="space-y-16">
       <HeroSection />
 
       <CategoryFilter 
         categories={uniqueCategories}
-        selectedCategory={categoryFromUrl}
-        onSelectCategory={handleSelectCategory}
-        isLoading={isLoading} 
+        isLoading={isLoadingCategories} 
       />
 
-      <FeaturesSection /> {/* Added Features Section */}
+      <FeaturesSection />
 
       <div id="products-grid" className="space-y-8">
         <div className="flex flex-col md:flex-row justify-end items-center gap-4 p-4 border-b border-border">
-          {/* SortProducts component removed */}
+          {/* Sort functionality can be added here if needed */}
         </div>
 
         {isLoading ? (

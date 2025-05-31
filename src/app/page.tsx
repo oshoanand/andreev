@@ -5,10 +5,10 @@ import { mockProducts } from '@/lib/mock-data';
 import type { Product } from '@/lib/types';
 import { ProductCard } from '@/components/products/ProductCard';
 import { SortProducts } from '@/components/products/SortProducts';
-import { useState, useMemo } from 'react';
-import { Input } from '@/components/ui/input';
+import { useState, useMemo, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Search, ShoppingCart } from 'lucide-react';
+import { ShoppingCart } from 'lucide-react'; // Search icon removed as it's no longer used here
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -68,16 +68,17 @@ const HeroSection = () => {
 };
 
 export default function HomePage() {
-  const [searchTerm, setSearchTerm] = useState('');
+  const searchParams = useSearchParams();
+  const searchTermFromUrl = searchParams.get('q') || '';
   const [sortOption, setSortOption] = useState('popularity');
 
   const filteredAndSortedProducts = useMemo(() => {
     let products = [...mockProducts];
 
-    if (searchTerm) {
+    if (searchTermFromUrl) {
       products = products.filter(product =>
-        product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        product.description.toLowerCase().includes(searchTerm.toLowerCase())
+        product.name.toLowerCase().includes(searchTermFromUrl.toLowerCase()) ||
+        product.description.toLowerCase().includes(searchTermFromUrl.toLowerCase())
       );
     }
 
@@ -99,24 +100,15 @@ export default function HomePage() {
         break;
     }
     return products;
-  }, [mockProducts, searchTerm, sortOption]);
+  }, [mockProducts, searchTermFromUrl, sortOption]);
 
   return (
-    <div className="space-y-12"> {/* Increased spacing for hero and content */}
+    <div className="space-y-12">
       <HeroSection />
 
       <div id="products-grid" className="space-y-8 pt-8">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4 p-4 border-b border-border">
-          <div className="relative w-full md:max-w-sm">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search products..."
-              className="pl-10 w-full bg-background"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
+        <div className="flex flex-col md:flex-row justify-end items-center gap-4 p-4 border-b border-border">
+          {/* Search input removed from here, now in Header */}
           <SortProducts onSortChange={setSortOption} currentSort={sortOption} />
         </div>
 

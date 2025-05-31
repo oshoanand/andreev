@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useCart } from '@/context/CartContext';
@@ -48,7 +49,13 @@ export function CartSidebar() {
                       <h3 className="font-semibold text-md text-foreground">{item.product.name}</h3>
                       <p className="text-sm text-muted-foreground">${item.product.price.toFixed(2)}</p>
                       <div className="flex items-center gap-2 mt-2">
-                        <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => updateQuantity(item.product.id, item.quantity - 1)}>
+                        <Button 
+                          variant="outline" 
+                          size="icon" 
+                          className="h-7 w-7" 
+                          onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
+                          disabled={item.quantity <= 1}
+                        >
                           <Minus className="h-3 w-3" />
                         </Button>
                         <span className="text-sm w-5 text-center">{item.quantity}</span>

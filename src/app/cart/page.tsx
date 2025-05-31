@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useCart } from '@/context/CartContext';
@@ -49,7 +50,13 @@ export default function CartPage() {
                   <p className="text-md font-semibold text-primary mt-1">${item.product.price.toFixed(2)}</p>
                 </div>
                 <div className="flex items-center gap-2 my-2 sm:my-0">
-                  <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => updateQuantity(item.product.id, item.quantity - 1)}>
+                  <Button 
+                    variant="outline" 
+                    size="icon" 
+                    className="h-8 w-8" 
+                    onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
+                    disabled={item.quantity <= 1}
+                  >
                     <Minus className="h-4 w-4" />
                   </Button>
                   <span className="text-lg w-8 text-center">{item.quantity}</span>

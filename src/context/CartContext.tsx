@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { CartItem, Product } from '@/lib/types';
@@ -47,7 +48,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
             : item
         );
       }
-      return [...prevItems, { product, quantity }];
+      return [...prevItems, { product, quantity: Math.max(1, quantity) }]; // Ensure at least 1 is added
     });
     toast({
       title: "Item added to cart",
@@ -56,8 +57,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const removeFromCart = (productId: string) => {
-    setCartItems((prevItems) => prevItems.filter((item) => item.product.id !== productId));
     const removedItem = cartItems.find(item => item.product.id === productId);
+    setCartItems((prevItems) => prevItems.filter((item) => item.product.id !== productId));
     if (removedItem) {
         toast({
             title: "Item removed from cart",
@@ -68,13 +69,12 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const updateQuantity = (productId: string, quantity: number) => {
-    if (quantity <= 0) {
-      removeFromCart(productId);
-      return;
-    }
+    // Ensure quantity does not go below 1. If it's 0 or less, it's handled by disabling the button or explicit removal.
+    const newQuantity = Math.max(1, quantity); 
+    
     setCartItems((prevItems) =>
       prevItems.map((item) =>
-        item.product.id === productId ? { ...item, quantity } : item
+        item.product.id === productId ? { ...item, quantity: newQuantity } : item
       )
     );
   };

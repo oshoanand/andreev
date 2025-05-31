@@ -7,7 +7,6 @@ import * as z from "zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react"; 
-import InputMask from "react-input-mask";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -22,11 +21,13 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
 import { Loader2, Mail, Lock } from "lucide-react"; 
-import { cn } from "@/lib/utils";
 
 const registerSchema = z.object({
   email: z.string().email({ message: "Invalid email address." }),
-  mobileNumber: z.string().regex(/^\+7 \(\d{3}\) \d{3}-\d{2}-\d{2}$/, { message: "Invalid Russian mobile number. Expected format: +7 (XXX) XXX-XX-XX" }),
+  mobileNumber: z.string()
+    .regex(/^\+7\s?\d{3}\s?\d{3}-?\d{2}-?\d{2}$/, { message: "Invalid Russian mobile number. Expected format: +7 XXX XXX-XX-XX or similar." })
+    .min(10, { message: "Mobile number must be at least 10 digits."})
+    .max(18, { message: "Mobile number is too long."}), // Allows for +7 (XXX) XXX-XX-XX with spaces/hyphens
   password: z.string().min(6, { message: "Password must be at least 6 characters." }),
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
@@ -104,20 +105,11 @@ export default function RegisterPage() {
                           <rect width="9" height="2" y="2" fill="#0039a6"/>
                           <rect width="9" height="2" y="4" fill="#d52b1e"/>
                         </svg>
-                        <InputMask
-                          mask="+7 (999) 999-99-99"
-                          value={field.value || ''}
-                          onChange={field.onChange}
-                          onBlur={field.onBlur}
-                          name={field.name}
-                          inputRef={field.ref} 
-                          disabled={isLoading || field.disabled}
-                          type="tel"
-                          placeholder="+7 (___) ___-__-__"
-                          className={cn(
-                            "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
-                            "pl-12" 
-                          )}
+                        <Input 
+                          type="tel" 
+                          placeholder="+7 XXX XXX-XX-XX" 
+                          {...field} 
+                          className="pl-12" 
                         />
                       </div>
                     </FormControl>

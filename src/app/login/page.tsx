@@ -21,7 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Mail, Lock, Eye, EyeOff } from "lucide-react"; // Added Eye and EyeOff
+import { Loader2, Mail, Lock, Eye, EyeOff } from "lucide-react";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Invalid email address." }),
@@ -36,7 +36,7 @@ export default function LoginPage() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [isResettingPassword, setIsResettingPassword] = useState(false);
-  const [showPassword, setShowPassword] = useState(false); // State for password visibility
+  const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -71,8 +71,10 @@ export default function LoginPage() {
     setIsResettingPassword(true);
     try {
       await sendPasswordReset(email);
+      // Toast is handled in AuthContext
     } catch (error) {
-      // Toast is handled in AuthContext, but error is re-thrown
+      // Error is re-thrown from AuthContext, toast is already shown.
+      // No need to show another toast here unless it's for a UI specific error.
     } finally {
       setIsResettingPassword(false);
     }
@@ -119,7 +121,7 @@ export default function LoginPage() {
                           type={showPassword ? "text" : "password"} 
                           placeholder="••••••••" 
                           {...field} 
-                          className="pl-10 pr-10" // Added pr-10 for eye icon
+                          className="pl-10 pr-10"
                         />
                         <Button 
                           type="button" 
@@ -137,7 +139,7 @@ export default function LoginPage() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button type="submit" className="w-full" disabled={isLoading || isResettingPassword}>
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Sign In
               </Button>
@@ -145,8 +147,13 @@ export default function LoginPage() {
           </Form>
         </CardContent>
         <CardFooter className="flex flex-col items-center space-y-4">
-           <Button variant="link" onClick={handlePasswordReset} disabled={isResettingPassword || isLoading} className="text-sm">
-            {isResettingPassword ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+           <Button 
+            variant="link" 
+            onClick={handlePasswordReset} 
+            disabled={isResettingPassword || isLoading} 
+            className="text-sm"
+          >
+            {isResettingPassword && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Forgot Password?
           </Button>
           <p className="text-sm text-muted-foreground">

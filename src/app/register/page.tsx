@@ -18,10 +18,12 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { Input } // Input is kept for other fields
+from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
 import { Loader2, Mail, Lock, Phone } from "lucide-react"; 
+import { cn } from "@/lib/utils"; // Import cn
 
 const registerSchema = z.object({
   email: z.string().email({ message: "Invalid email address." }),
@@ -54,13 +56,9 @@ export default function RegisterPage() {
 
   const onSubmit = async (data: RegisterFormValues) => {
     setIsLoading(true);
-    // In a real app, you might want to unmask the mobile number before sending it
-    // console.log("Submitting data:", data); 
-    const user = await signUp(data.email, data.password); // Mobile number not directly used by Firebase default signUp
+    const user = await signUp(data.email, data.password); 
     setIsLoading(false);
     if (user) {
-      // You might want to save the mobile number to Firestore or Realtime Database here
-      // associated with user.uid
       router.push("/profile"); 
     }
   };
@@ -108,11 +106,19 @@ export default function RegisterPage() {
                           disabled={isLoading}
                         >
                           {(inputProps: any) => (
-                            <Input
+                            <input
                               {...inputProps}
+                              ref={field.ref} // Pass ref from react-hook-form
                               type="tel"
                               placeholder="(123) 456-7890"
-                              className="pl-10"
+                              className={cn(
+                                "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background",
+                                "file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground",
+                                "placeholder:text-muted-foreground",
+                                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                                "disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+                                "pl-10" // Specific class for padding due to icon
+                              )}
                             />
                           )}
                         </InputMask>

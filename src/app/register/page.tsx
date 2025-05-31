@@ -12,12 +12,14 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
 import { Loader2, Mail, Lock } from "lucide-react"; 
@@ -27,9 +29,12 @@ const registerSchema = z.object({
   mobileNumber: z.string()
     .regex(/^\+7\s?\d{3}\s?\d{3}-?\d{2}-?\d{2}$/, { message: "Invalid Russian mobile number. Expected format: +7 XXX XXX-XX-XX or similar." })
     .min(10, { message: "Mobile number must be at least 10 digits."})
-    .max(18, { message: "Mobile number is too long."}), // Allows for +7 (XXX) XXX-XX-XX with spaces/hyphens
+    .max(18, { message: "Mobile number is too long."}),
   password: z.string().min(6, { message: "Password must be at least 6 characters." }),
   confirmPassword: z.string(),
+  agreeToTerms: z.boolean().refine((val) => val === true, {
+    message: "You must accept the terms and conditions.",
+  }),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match.",
   path: ["confirmPassword"], 
@@ -49,6 +54,7 @@ export default function RegisterPage() {
       mobileNumber: "",
       password: "",
       confirmPassword: "",
+      agreeToTerms: false,
     },
   });
 
@@ -146,6 +152,34 @@ export default function RegisterPage() {
                       </div>
                     </FormControl>
                     <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="agreeToTerms"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow-sm">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>
+                        I agree to the{" "}
+                        <Link href="/terms" className="text-primary hover:underline" target="_blank">
+                          Terms and Conditions
+                        </Link>{" "}
+                        and{" "}
+                        <Link href="/privacy" className="text-primary hover:underline" target="_blank">
+                          Privacy Policy
+                        </Link>
+                        .
+                      </FormLabel>
+                      <FormMessage />
+                    </div>
                   </FormItem>
                 )}
               />

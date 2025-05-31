@@ -40,12 +40,12 @@ export function CategoryFilter({ categories, selectedCategory, onSelectCategory 
               variant="outline"
               onClick={() => onSelectCategory(category.name === 'All' ? null : category.name)}
               className={cn(
-                "h-auto p-3 flex flex-col items-center space-y-2 w-28 min-w-[7rem] rounded-xl shadow-sm hover:shadow-md transition-all duration-200", // Changed rounded-lg to rounded-xl
+                "h-24 w-24 p-2 flex flex-col items-center justify-center space-y-1 rounded-full shadow-sm hover:shadow-md transition-all duration-200",
                 "bg-card hover:bg-muted/80 border-border",
                 (selectedCategory === category.name || (selectedCategory === null && category.name === 'All')) && "ring-2 ring-primary border-primary bg-primary/10 hover:bg-primary/20"
               )}
             >
-              <div className="relative w-16 h-16 rounded-md overflow-hidden bg-muted flex items-center justify-center">
+              <div className="relative w-14 h-14 rounded-full overflow-hidden bg-muted flex items-center justify-center">
                 {category.name === 'All' ? (
                   <LayoutGrid className="w-8 h-8 text-muted-foreground" />
                 ) : (
@@ -53,7 +53,7 @@ export function CategoryFilter({ categories, selectedCategory, onSelectCategory 
                     src={category.imageUrl}
                     alt={category.name}
                     fill
-                    sizes="64px"
+                    sizes="56px" // Corresponds to w-14 h-14
                     className="object-cover"
                     data-ai-hint={category.dataAiHint}
                   />
@@ -68,3 +68,4 @@ export function CategoryFilter({ categories, selectedCategory, onSelectCategory 
     </motion.div>
   );
 }
+

@@ -4,6 +4,7 @@
 import { mockProducts } from '@/lib/mock-data';
 import type { Product, ProductCategory } from '@/lib/types';
 import { ProductCard } from '@/components/products/ProductCard';
+import { ProductCardSkeleton } from '@/components/products/ProductCardSkeleton';
 import { CategoryFilter } from '@/components/products/CategoryFilter';
 import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
@@ -25,7 +26,7 @@ const HeroSection = () => {
         <Image
           src="https://placehold.co/1200x500.png"
           alt="Abstract background representing modern e-commerce products"
-          layout="fill"
+          fill
           objectFit="cover"
           className="opacity-10 dark:opacity-5"
           data-ai-hint="abstract modern pattern"
@@ -72,23 +73,37 @@ export default function HomePage() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
   const searchTermFromUrl = searchParams.get('q') || '';
   const categoryFromUrl = searchParams.get('category') || null;
   
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setIsLoading(true);
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1500)); // Adjust delay as needed
+      setProducts(mockProducts); // In a real app, this would be an API call: const data = await fetch('/api/products'); setProducts(await data.json());
+      setIsLoading(false);
+    };
+    fetchProducts();
+  }, []);
+
   const uniqueCategories = useMemo(() => {
+    if (isLoading) return []; // Don't compute categories until products are loaded
     const categoriesMap = new Map<string, ProductCategory>();
-    mockProducts.forEach(product => {
+    products.forEach(product => {
       if (!categoriesMap.has(product.category)) {
         categoriesMap.set(product.category, {
           name: product.category,
-          // Placeholder - in a real app, these would come from a CMS or be predefined
           imageUrl: `https://placehold.co/100x100.png?text=${encodeURIComponent(product.category)}`,
           dataAiHint: `${product.category.toLowerCase()}`,
         });
       }
     });
     return Array.from(categoriesMap.values());
-  }, []); // mockProducts is stable, so empty array is fine if mockProducts doesn't change.
+  }, [products, isLoading]);
 
   const handleSelectCategory = (categoryName: string | null) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -101,24 +116,25 @@ export default function HomePage() {
   };
   
   const filteredAndSortedProducts = useMemo(() => {
-    let products = [...mockProducts];
+    if (isLoading) return []; // Don't filter until products are loaded
+    let filtered = [...products];
 
     if (searchTermFromUrl) {
-      products = products.filter(product =>
+      filtered = filtered.filter(product =>
         product.name.toLowerCase().includes(searchTermFromUrl.toLowerCase()) ||
         product.description.toLowerCase().includes(searchTermFromUrl.toLowerCase())
       );
     }
 
     if (categoryFromUrl) {
-      products = products.filter(product => product.category === categoryFromUrl);
+      filtered = filtered.filter(product => product.category === categoryFromUrl);
     }
 
     // Default sort by popularity
-    products.sort((a, b) => b.popularity - a.popularity);
+    filtered.sort((a, b) => b.popularity - a.popularity);
     
-    return products;
-  }, [searchTermFromUrl, categoryFromUrl]); // mockProducts is stable
+    return filtered;
+  }, [products, searchTermFromUrl, categoryFromUrl, isLoading]);
 
   return (
     <div className="space-y-12">
@@ -128,6 +144,7 @@ export default function HomePage() {
         categories={uniqueCategories}
         selectedCategory={categoryFromUrl}
         onSelectCategory={handleSelectCategory}
+        isLoading={isLoading} // Pass loading state if CategoryFilter needs to show skeletons
       />
 
       <div id="products-grid" className="space-y-8">
@@ -135,7 +152,13 @@ export default function HomePage() {
           {/* SortProducts component removed */}
         </div>
 
-        {filteredAndSortedProducts.length > 0 ? (
+        {isLoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {Array.from({ length: 8 }).map((_, index) => ( // Show 8 skeletons
+              <ProductCardSkeleton key={index} />
+            ))}
+          </div>
+        ) : filteredAndSortedProducts.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredAndSortedProducts.map((product) => (
               <ProductCard key={product.id} product={product} />

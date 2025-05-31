@@ -26,6 +26,10 @@ export function ProductCard({ product }: ProductCardProps) {
   };
 
   const hasDiscount = product.originalPrice && product.originalPrice > product.price;
+  let discountPercent = 0;
+  if (hasDiscount && product.originalPrice) {
+    discountPercent = Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100);
+  }
 
   return (
     <Card className="overflow-hidden transition-shadow duration-300 flex flex-col h-full border">
@@ -41,12 +45,12 @@ export function ProductCard({ product }: ProductCardProps) {
               data-ai-hint={`${product.category} product`}
             />
           </div>
-          {hasDiscount && !isOutOfStock && (
+          {hasDiscount && !isOutOfStock && product.originalPrice && (
             <Badge
               variant="default"
               className="absolute top-2 right-2 bg-primary text-primary-foreground"
             >
-              Sale
+              {discountPercent}% OFF
             </Badge>
           )}
           {isOutOfStock && (

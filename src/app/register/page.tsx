@@ -27,10 +27,13 @@ import { Loader2, Mail, Lock } from "lucide-react";
 const registerSchema = z.object({
   email: z.string().email({ message: "Invalid email address." }),
   mobileNumber: z.string()
-    .regex(/^\+7\s?\d{3}\s?\d{3}-?\d{2}-?\d{2}$/, { message: "Invalid Russian mobile number. Expected format: +7 XXX XXX-XX-XX or similar." })
     .min(10, { message: "Mobile number must be at least 10 digits."})
-    .max(18, { message: "Mobile number is too long."}),
-  password: z.string().min(6, { message: "Password must be at least 6 characters." }),
+    .max(18, { message: "Mobile number is too long."})
+    .regex(/^\+7\s?\d{3}\s?\d{3}-?\d{2}-?\d{2}$/, { message: "Invalid Russian mobile number. Expected format: +7 XXX XXX-XX-XX or similar." }),
+  password: z.string()
+    .min(8, { message: "Password must be at least 8 characters." })
+    .regex(/[A-Z]/, { message: "Password must contain at least one uppercase letter." })
+    .regex(/[0-9]/, { message: "Password must contain at least one number." }),
   confirmPassword: z.string(),
   agreeToTerms: z.boolean().refine((val) => val === true, {
     message: "You must accept the terms and conditions.",

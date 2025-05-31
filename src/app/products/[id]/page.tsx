@@ -20,7 +20,7 @@ interface ProductPageProps {
   };
 }
 
-export default function ProductPage({ params }: ProductPageProps) {
+export default function ProductPage({ params }: { params: { id: string } }) {
   const productId = params.id;
   const product: Product | undefined = mockProducts.find(p => p.id === productId);
   const { cartItems } = useCart(); // Get cartItems to check if item is in cart

@@ -100,8 +100,8 @@ export default function CartPage() {
             </div>
           </CardContent>
           <CardFooter>
-            <Button size="lg" className="w-full" onClick={() => alert('Proceeding to checkout (mock)!')}>
-              Proceed to Checkout
+            <Button size="lg" className="w-full" asChild>
+              <Link href="/checkout">Proceed to Checkout</Link>
             </Button>
           </CardFooter>
         </Card>

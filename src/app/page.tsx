@@ -121,9 +121,11 @@ export default function HomePage() {
     let filtered = [...products];
 
     if (searchTermFromUrl) {
+      const lowerCaseSearchTerm = searchTermFromUrl.toLowerCase();
       filtered = filtered.filter(product =>
-        product.name.toLowerCase().includes(searchTermFromUrl.toLowerCase()) ||
-        product.description.toLowerCase().includes(searchTermFromUrl.toLowerCase())
+        product.name.toLowerCase().includes(lowerCaseSearchTerm) ||
+        product.description.toLowerCase().includes(lowerCaseSearchTerm) ||
+        product.category.toLowerCase().includes(lowerCaseSearchTerm)
       );
     }
     
@@ -132,7 +134,7 @@ export default function HomePage() {
         filtered.sort((a, b) => a.price - b.price);
         break;
       case 'price-desc':
-        filtered.sort((a, b) => b.price - a.price);
+        filtered.sort((a, b) => b.price - b.price);
         break;
       case 'name-asc':
         filtered.sort((a, b) => a.name.localeCompare(b.name));

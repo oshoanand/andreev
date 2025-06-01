@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
 import { useIsMobile } from '@/hooks/use-mobile';
-import React, { useState, useEffect, type ChangeEvent } from 'react';
+import React, { useState, useEffect, type ChangeEvent, type FormEvent } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { Separator } from '../ui/separator';
 
@@ -28,20 +28,24 @@ export function NavMenu() {
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
 
   useEffect(() => {
+    // Update search query in the input if URL changes (e.g. back/forward)
     setSearchQuery(searchParams.get('q') || '');
   }, [searchParams]);
 
-  const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const newQuery = e.target.value;
-    setSearchQuery(newQuery);
-
-    const params = new URLSearchParams(searchParams.toString());
-    if (newQuery.trim()) {
-      params.set('q', newQuery.trim());
-    } else {
-      params.delete('q');
+  const handleSearchInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value); // Only update local state
+  };
+  
+  const handleSearchSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const params = new URLSearchParams(); // Start with fresh params for new search
+    if (searchQuery.trim()) {
+      params.set('q', searchQuery.trim());
     }
-    router.replace(`/?${params.toString()}`);
+    // Navigate to homepage with the search query.
+    // If already on homepage, it will re-render with the new query.
+    // If on another page, it will navigate to the homepage.
+    router.push(`/?${params.toString()}`);
   };
   
   const commonLinkClasses = "text-sm font-medium text-foreground hover:text-primary transition-colors flex items-center gap-2";
@@ -49,31 +53,31 @@ export function NavMenu() {
   const mobileLinkClasses = `block w-full px-4 py-3 text-base ${commonLinkClasses}`;
 
   const SearchInputDesktop = () => (
-    <div className="relative hidden md:flex items-center ml-4">
+    <form onSubmit={handleSearchSubmit} className="relative hidden md:flex items-center ml-4">
       <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
       <Input
         type="search"
         placeholder="Search products..."
         value={searchQuery}
-        onChange={handleSearchChange}
+        onChange={handleSearchInputChange}
         className="pl-10 h-9 rounded-lg w-48 lg:w-64 bg-muted/50 dark:bg-muted/30 focus:bg-background dark:focus:bg-card transition-colors"
       />
-    </div>
+    </form>
   );
 
   const SearchInputMobile = () => (
-     <div className="p-4 border-b border-border">
+     <form onSubmit={handleSearchSubmit} className="p-4 border-b border-border">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             type="search"
             placeholder="Search products..."
             value={searchQuery}
-            onChange={handleSearchChange}
+            onChange={handleSearchInputChange}
             className="pl-10 w-full h-10 rounded-lg bg-muted focus:bg-background"
           />
         </div>
-      </div>
+      </form>
   );
 
   const renderNavItems = (isMobileLayout: boolean) => {

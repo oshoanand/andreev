@@ -117,9 +117,8 @@ const HeroSection = () => {
           animate="center"
           exit="exit"
           transition={{
-            type: "spring",
-            stiffness: 300,
-            damping: 30
+            ease: "easeOut",
+            duration: 0.5
           }}
           drag="x"
           dragConstraints={{ left: 0, right: 0 }}
